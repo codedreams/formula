@@ -1,19 +1,19 @@
 (ns formula.core
-  (:require [hiccup.util :refer :all]
+  (:require [trust.escape :refer :all]
+            [hiccup.util :refer [to-uri]]
             [hiccup.def :refer [defelem]]
             [hiccup.form :refer [hidden-field select-options]]))
 
-;;; USE trust for escaping value
 (defn- input-field
-  "For different input fields"
+  "For different input fields - escapes value"
   [type name attrs]
   [:input (conj {:type type
                  :name name
                  :id name
-                 :value (:value attrs)} attrs)])
+                 :value (escape-html (:value attrs))} attrs)])
 
 (defn- display-error
-  "Displays errors if map contains value"
+  "Displays errors if map contains a message"
   [f-name field errors]
   (let [str-name (name f-name)]
     (if (f-name errors)
@@ -30,13 +30,13 @@
         field (input-field type str-name attrs)]
     (display-error f-name field errors)))
 
-;;; USE trust to escape values
 (defelem text-area
-  "Creates text area element"
+  "Creates text area element - escapes value"
   [_ f-name attrs & [errors]]
   (let [m-attrs (dissoc attrs :value)
         field [:textarea (conj {:name f-name
-                                :id f-name} m-attrs) (:value attrs)]]
+                                :id f-name} m-attrs)
+               (escape-html (:value attrs))]]
     (display-error f-name field errors)))
 
 (defelem button

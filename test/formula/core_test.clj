@@ -4,7 +4,7 @@
         hiccup.core))
 
 ;; (pprint (html (fform [:post "/login"]
-;;                      [[:text :username {:class "usern"}]
+;;                      [[:textarea :username {:class "usern" :value "<i>"}]
 ;;                       [:password :password {:class "pass"}]]
 ;;                      {:username "bad" :password "bad"})))
 
