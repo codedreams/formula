@@ -1,5 +1,5 @@
 (ns formula.core
-  (:require [trust.escape :refer :all]
+  (:require [trust.escape :refer [escape-html]]
             [hiccup.util :refer [to-uri]]
             [hiccup.def :refer [defelem]]
             [hiccup.form :refer [hidden-field select-options]]))
