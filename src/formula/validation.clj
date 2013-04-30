@@ -1,5 +1,7 @@
 (ns formula.validation)
 
+(def ^{:dynamic true} *output* println)
+
 (def call
   "Changes strings into function calls"
   #(resolve (symbol (name %))))
@@ -115,26 +117,60 @@
     (when result
       {field-key (message field-key custom "%s must be unique")})))
 
+(defn loop-fn [rules validate-fn & [messages]]
+  (loop [rules rules errors {}]
+    (if (or (empty? rules) (seq errors))
+      errors
+      (recur (rest rules)
+             (conj errors (validate-fn (first rules) messages))))))
+
+(defn numbers
+  ""
+  [field-key number-map vali-map & [messages]]
+  ;;; Put try catch, right after check if only-int, if-not parse float
+  (try
+    (let [custom (:numbers (field-key messages))
+          options
+          {:gt #(or (> % %2) (str "%s must be greater than " %2))
+           :gte #(or (>= % %2) (str "%s must be greater or equal to " %2))
+           :eq #(or (= % %2) (str "%s must be equal to " %2)) 
+           :lt #(or (< % %2) (str "%s must be less than " %2))
+           :lte #(or (<= % %2) (str "%s must be less than or equal to " %2))
+           :only-int (fn [val _] (or (integer? val) "%s must be an integer"))
+           :odd (fn [val _] (or (odd? (int val)) "%s must be odd"))
+           :even (fn [val _] (or (even? (int val)) "%s must be even"))
+           }
+          value (field-key vali-map)
+          value (if (some #{:only-int} (keys number-map))
+                  value (Float/parseFloat (str value)))
+          num-fn (fn [[k v] & [msg]]
+                   (let [answer ((k options) value v)]
+                     (if (true? answer)
+                       {} {field-key (message field-key custom answer)})))]
+      (loop-fn number-map num-fn messages))
+    (catch Exception e (do (*output* (.getMessage e))
+                           {field-key (message field-key nil
+                                               "%s must be number")}))))
+
 (defn sender-loop [field rules vali-map & [messages]]
   (let [vali (fn [r & [msg]] (if (map? r)
                       ((call (apply key r)) field (apply val r) vali-map msg)
                       ((call r) field vali-map msg)))]
-        (loop [rules rules errors {}]
-          (if (or (empty? rules) (seq errors))
-            errors
-            (recur (rest rules)
-                   (conj errors (vali (first rules) messages)))))))
+    (loop-fn rules vali messages)))
 
 (defn default-check
   "Checks to see if value is nil or blank."
-  [field rules vali-map & [messages]]
+  [field-key rules vali-map & [messages]]
   (let [allow-nil (some #{:allow-nil} rules)
         allow-blank (some #{:allow-blank} rules)
         present (first (filter #{:present} rules))
+        skip (and (nil? present) (false? (get vali-map field-key false)))
         rules [{:allow-nil allow-nil}
                {:allow-blank allow-blank}]
         rules (if present (cons present rules) rules)]
-    (sender-loop field rules vali-map messages)))
+    (if skip
+      {}
+      (sender-loop field-key rules vali-map messages))))
 
 (defn sender 
   "Sends rules to correct functions. Once an validation error has

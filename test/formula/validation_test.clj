@@ -4,24 +4,17 @@
         midje.sweet
         hiccup.core))
 
-; present = any value is present
-; confirmation = matches another field
-; exclusion = not included in list
-; format = match certain regex
-; inclusion = included in list
-; length = within a certain length ... max and/or min
-; numericality = only integers
-; uniqueness = value is unique ; case_sensitive
-; options allow_nil allow_blank message
-; make their own function
 
+;; (alter-var-root #'formula.validation/*output*
+;;                 (constantly #(do (println "new output")
+;;                                  (println %))))
 
-;(confirm :confirmation [:password] user)
-;(present :username user)
+; todo list
+; Implement try catch on functions
+; Write test for dynamic var *output*
 
-;((call :present) :password user)
-
-(def user-m {:username "joe" :password "abcdef" :confirmation "abcdef"})
+(def user-m {:username "joe" :password "abcdef" :confirmation "abcdef"
+             :gender "male" :age nil :nickname "" :friends 30})
 
 (facts "call - should take string and make function call"
       ((call "str") 1) => "1"
@@ -175,6 +168,47 @@
         (fact "should return nil"
               (vali {:length {:min 2 :max 5}} {}))))
 
+(facts "numbers - should return an error or {}"
+       (fact "should return {} when all is good"
+             (numbers :friends {:gt 10 :lt 40 :even true :lte 30 :only-int true
+                                :gte 30} user-m)
+             => {})
+       (fact "should return first error - odd"
+             (numbers :friends {:odd true :gt 31} user-m)
+             => {:friends "friends must be odd"})
+       (fact "return error gt"
+             (numbers :friends {:eq 30 :lt 40 :even true :only-int true :gt 31}
+                      user-m)
+             => {:friends "friends must be greater than 31"})
+        (fact "return error gte"
+              (numbers :friends {:eq 30 :lt 40 :even true :only-int true :gte 31}
+                       user-m)
+             => {:friends "friends must be greater or equal to 31"})
+        (fact "return error lt"
+              (numbers :friends {:eq 30 :lte 40 :even true :only-int true :lt 29}
+                       user-m)
+             => {:friends "friends must be less than 29"})
+        (fact "return error lte"
+              (numbers :friends {:eq 30 :lt 40 :even true :only-int true :lte 29}
+                       user-m)
+             => {:friends "friends must be less than or equal to 29"})
+        (fact "return error eq"
+              (numbers :friends {:lt 40 :even true :only-int true :lte 29 :eq 31}
+                       user-m)
+             => {:friends "friends must be equal to 31"})
+        (fact "return error only-int"
+              (numbers :friends {:lt 40 :even true :lte 31 :eq 30.0 :only-int true}
+                       (conj user-m {:friends 30.0}))
+             => {:friends "friends must be an integer"})
+        (fact "return error even"
+              (numbers :friends {:lte 31 :eq 29 :only-int true :lt 40 :even true}
+                       (conj user-m {:friends 29}))
+             => {:friends "friends must be even"})
+        (fact "should return custom message if provided"
+              (numbers :friends {:gt 31} user-m {:friends {:numbers "%s must be >"}})
+             => {:friends "friends must be >"}))
+
+
 (facts "sender-loop loop"
       (let [vali (fn [r & msg] (if (map? r)
                           ((call (apply key r)) :username (apply val r) user-m msg)
@@ -215,10 +249,18 @@
        (fact "should return an error when empty?"
              (default-check :username [nil :present] (conj user-m {:username ""}))
              => {:username "username can't be blank"})
+       (fact "should return {} if no field or :present"
+             (default-check :business [{:exlusion ["groupon"]}] user-m)
+             => {})
+       (fact "should return error when nil"
+             (default-check :age [{:length {:min 7 :max 9}}] user-m)
+             => {:age "age can't be empty"})
+       (fact "error return with no field and :present"
+             (default-check :business [:present {:exclusion ["groupon"]}] user-m)
+             => {:business "business must be present"})
        (fact "nil should work if allow-nil is in rules"
              (default-check :username [:present :allow-nil]
                (conj user-m {:username nil})) => {}))
-
 
 (facts "sender - should return errors or {}"
       (fact "should return {} when all is good"
@@ -234,14 +276,32 @@
             => {:username "wrong"}))
 
 
-(facts "validate - should return errors or {}")
+(facts "validate - When all is good {} should be returned"
+       (fact "should return {} when all good"
+             (validate [[:password :present {:length {:min 6 :max 30}}
+                         {:formats #"\w+"}]
+                        [:username :present {:unique #(= % "nada")}]
+                        [:confirmation :present {:confirm [:password]}]
+                        [:gender :present {:inclusion ["female" "male"]}]
+                        [:business {:exclusion ["facebook" "windows"]}]
+                        [:age :allow-nil]
+                        [:friends {:numbers {:gt 10 :lt 40 :even true :lte 30
+                                             :only-int true :gte 30}}]
+                        [:nickname :allow-blank]] user-m)
+             => {}))
 
-;; (validate [[:password :present {:formats #"\d+"}]
-;;            [:username :present]
-;;            [:gender :present :allow-blank]
-;;            [:confirmation :present {:confirm [:password]}]
-;;            ;[:password :present {:length {:min 3 :max 5}}]
-;;            ]
-;;           user {:username {:present "bad"
-;;                            :allow-nil "%s can't be nil"}})
+(facts "validate - When all is bad errors should be returned"
+       (fact "should get errors"
+             (validate [[:password :present {:length {:min 8}}]
+                        [:age {:length {:min 3 :max 10}}]
+                        [:username :present {:unique #(= % "joe")}]
+                        [:gender {:inclusion ["nada"]}]
+                        [:school :present]
+                        [:nickname {:exclusion ["admin"]}]] user-m)
+             => {:password "password should be at least 8 characters"
+                 :age "age can't be empty"
+                 :username "username must be unique"
+                 :gender "gender is not an acceptable term"
+                 :school "school must be present"
+                 :nickname "nickname can't be blank"}))
 
