@@ -1,4 +1,16 @@
-###Formula's Form
+# Formula
+Formula is a clojure library for html forms
+
+
+Install
+-------
+To test formula out, 
+add the following dependency to your `project.clj` file:
+
+    [formula "1.0.0-alpha"]
+
+###Formula's Forms
+
 
 Formula is built using hiccup and clojure.  It is designed to make form easy to build, and validate.  The forms have reusability by taking error messages and displaying with the fields (see designed flow, below).  A basic form would look like this
 
