@@ -1,7 +1,5 @@
 (ns formula.validation)
 
-(def ^{:dynamic true} *output* println)
-
 (def call
   "Changes strings into function calls"
   #(resolve (symbol (name %))))
@@ -125,7 +123,8 @@
              (conj errors (validate-fn (first rules) messages))))))
 
 (defn numbers
-  ""
+  "Checks to see if number matches various options supported.  If value
+   is not a number, defaults to error message \"whatever must be a number\"."
   [field-key number-map vali-map & [messages]]
   ;;; Put try catch, right after check if only-int, if-not parse float
   (try
@@ -148,9 +147,8 @@
                      (if (true? answer)
                        {} {field-key (message field-key custom answer)})))]
       (loop-fn number-map num-fn messages))
-    (catch Exception e (do (*output* (.getMessage e))
-                           {field-key (message field-key nil
-                                               "%s must be number")}))))
+    (catch Exception e {field-key (message field-key nil
+                                              "%s must be a number")})))
 
 (defn sender-loop [field rules vali-map & [messages]]
   (let [vali (fn [r & [msg]] (if (map? r)

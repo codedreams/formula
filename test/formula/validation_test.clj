@@ -4,15 +4,6 @@
         midje.sweet
         hiccup.core))
 
-
-;; (alter-var-root #'formula.validation/*output*
-;;                 (constantly #(do (println "new output")
-;;                                  (println %))))
-
-; todo list
-; Implement try catch on functions
-; Write test for dynamic var *output*
-
 (def user-m {:username "joe" :password "abcdef" :confirmation "abcdef"
              :gender "male" :age nil :nickname "" :friends 30})
 
@@ -61,6 +52,9 @@
               => nil)
         (fact "error when blank"
               (allow-blank :username nil user-blank)
+              => {:username "username can't be blank"})
+        (fact "error when blank but spaces"
+              (allow-blank :username false (conj user-m {:username "  "}))
               => {:username "username can't be blank"})
         (fact "show custom message when provided"
               (allow-blank :username false user-blank
@@ -206,7 +200,10 @@
              => {:friends "friends must be even"})
         (fact "should return custom message if provided"
               (numbers :friends {:gt 31} user-m {:friends {:numbers "%s must be >"}})
-             => {:friends "friends must be >"}))
+             => {:friends "friends must be >"})
+        (fact "error when unrecognized value"
+              (numbers :friends {:gt 31} (conj user-m {:friends "bad-value"}))
+              => {:friends "friends must be a number"}))
 
 
 (facts "sender-loop loop"
