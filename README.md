@@ -103,7 +103,7 @@ Formula uses the same form to display fields, and display errors.  The flow is d
 
 *Below is a rough diagram of this process
 
-![Flow icon](http://i42.tinypic.com/110ztj8.png)
+![Flow icon](http://i42.tinypic.com/30vgdn5.png)
 
 ***
 ***
