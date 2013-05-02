@@ -77,7 +77,9 @@
   [[method action] field-vec & [errors]]
   
   (let [method-str (.toUpperCase (name method))
-        action-uri (to-uri action)]
+        action-uri (to-uri action)
+        errors (if (:no-errors errors) nil errors)
+        ]
     
     (-> (if (contains? #{:get :post} method)
           [:form {:method method-str, :action action-uri}]

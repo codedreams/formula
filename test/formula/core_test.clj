@@ -167,6 +167,17 @@
                  [:input {:type :text :id "search" :name "search" :value "&lt;i&gt;"
                           :placeholder "Search"}]]))
 
+(facts "fform - should not display error if :no-errors is present"
+       (fact "shouldn't display errors"
+             (fform [:post "/login"]
+                    [[:textarea :username {:class "usern" :value "<i>"}]
+                     [:password :password {:class "pass"}]]
+                    {:no-errors true :username "bad" :password "pass"})
+             => [:form {:action (java.net.URI. "/login") :method "POST"}
+                 [:textarea {:class "usern" 
+                             :id :username :name :username} "&lt;i&gt;"]
+                 [:input {:type :password :id "password" :class "pass"
+                          :name "password" :value ""}]]))
 
 
 
