@@ -39,8 +39,9 @@
              (display-error :username [:input {:type "text" :name "username"
                                                :value ""}]
                             {:username "username must be present"})
-             => [:div [:p {:class "username-error"} "username must be present"]
-                 [:input {:type "text" :name "username" :value ""}]])
+             => [:div 
+                 [:input {:type "text" :name "username" :value ""}]
+                 [:p {:class "username-error"} "username must be present"]])
        (fact "should not return error if error for another field"
              (display-error :username [:input {:type "text" :name "username"
                                                :value ""}]
@@ -76,8 +77,10 @@
                         :placeholder "Search" :value "Anything"}])
       (fact "should display errors if available"
             (generic-input :text :search {} {:search "File must be jpg"})
-            => [:div [:p {:class "search-error"} "File must be jpg"]
-                [:input {:type :text :name "search" :id "search" :value ""}]]))
+            => [:div
+                [:input {:type :text :name "search" :id "search" :value ""}]
+                [:p {:class "search-error"} "File must be jpg"]
+                ]))
 
 (facts "text-area - should produce a text area field"
        (fact "should create text area with no error"
@@ -85,8 +88,10 @@
                                                          :id :problems} ""])
        (fact "should create text area with errors"
              (text-area nil :help {} {:help "help must be present"})
-             => [:div [:p {:class "help-error"} "help must be present"]
-                 [:textarea {:name :help :id :help} ""]])
+             => [:div
+                 [:textarea {:name :help :id :help} ""]
+                 [:p {:class "help-error"} "help must be present"]
+                 ])
        (fact "should accept extra attributes"
              (text-area nil :help {:placeholder "Questions Here"
                                    :value "<i>hello</i>"})
@@ -110,10 +115,10 @@
       (fact "should return error if present"
             (drop-down nil :friends
                        {:options ["so" "say"]} {:friends "not an option"})
-            => [:div [:p {:class "friends-error"} "not an option"]
-                      [:select {:name :friends :id :friends}
+            => [:div [:select {:name :friends :id :friends}
                        '([:option {:selected false} "so"]
-                           [:option {:selected false} "say"])]])
+                           [:option {:selected false} "say"])]
+                [:p {:class "friends-error"} "not an option"]])
       
       (fact "should return dropdown with select attribute"
             (drop-down nil :friends {:options ["so" "say"] :selected "say"})
@@ -135,13 +140,13 @@
                            [:password :password]]
                           {:username "must be present" :password "doesn't match"})
              => '([:div
-                   [:p {:class "username-error"} "must be present"]
                    [:input {:type :text :class "user" :value "&lt;i&gt;"
-                            :id "username" :name "username"}]]
+                            :id "username" :name "username"}]
+                   [:p {:class "username-error"} "must be present"]]
                     [:div
-                     [:p {:class "password-error"} "doesn't match"]
                      [:input {:type :password :id "password"
-                              :name "password" :value ""}]])))
+                              :name "password" :value ""}]
+                     [:p {:class "password-error"} "doesn't match"]])))
 
 (facts "fform - should create forms"
        (fact "should create post form"
@@ -151,13 +156,13 @@
                     {:username "bad" :password "bad"})
              => [:form {:action (java.net.URI. "/login") :method "POST"}
                  [:div
-                  [:p {:class "username-error"} "bad"]
                   [:textarea {:class "usern" 
-                              :id :username :name :username} "&lt;i&gt;"]]
+                              :id :username :name :username} "&lt;i&gt;"]
+                  [:p {:class "username-error"} "bad"]]
                  [:div
-                  [:p {:class "password-error"} "bad"]
                   [:input {:type :password :id "password" :class "pass"
-                           :name "password" :value ""}]]])
+                           :name "password" :value ""}]
+                  [:p {:class "password-error"} "bad"]]])
        
        (fact "should create get form"
              (fform [:get "/login"]

@@ -19,8 +19,9 @@
   (let [str-name (name attr-key)]
     (if (attr-key errors)
       [:div
+       field
        [:p {:class (str str-name "-error")}
-        (attr-key errors)] field]
+        (attr-key errors)]]
       field)))
 
 (defelem generic-input
