@@ -7,9 +7,9 @@
 (def user-m {:username "joe" :password "abcdef" :confirmation "abcdef"
              :gender "male" :age nil :nickname "" :friends 30})
 
-(facts "call - should take string and make function call"
-      ((call "str") 1) => "1"
-      ((call "nil?") nil) => true)
+;; (facts "call - should take string and make function call"
+;;       ((call "str") 1) => "1"
+;;       ((call "nil?") nil) => true)
 
 (facts "message - use format for custom message or default"
        (fact "no custom should return default"

@@ -1,8 +1,8 @@
 (ns formula.validation)
 
-(def call
-  "Changes strings into function calls"
-  #(resolve (symbol (name %))))
+;; (def call
+;;   "Changes strings into function calls"
+;;   #(resolve (symbol (name %))))
 
 (defn message
   "Creates messages"
@@ -149,6 +149,10 @@
       (loop-fn number-map num-fn messages))
     (catch Exception e {field-key (message field-key nil
                                               "%s must be a number")})))
+
+(def call {:present present :allow-nil allow-nil :allow-blank allow-blank
+            :confirm confirm :exclusion exclusion :inclusion inclusion
+            :formats formats :length length :unique unique :numbers numbers})
 
 (defn sender-loop [field rules vali-map & [messages]]
   (let [vali (fn [r & [msg]] (if (map? r)
