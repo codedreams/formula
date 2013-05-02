@@ -68,7 +68,10 @@
   (let [deal (fn [[field attr-key attrs]]
                ((or (field field-map) generic-input) field attr-key attrs errors))
         body (map deal field-vec)]
-    body))
+    (if (:generic-error errors)
+      (concat (seq [[:p {:class "generic-error"} (:generic-error errors)]])
+              body)
+      body)))
 
 (defelem fform
   "Creates a form that points to a particular method and route.

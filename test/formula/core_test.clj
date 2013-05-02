@@ -179,6 +179,18 @@
                  [:input {:type :password :id "password" :class "pass"
                           :name "password" :value ""}]]))
 
-
+(facts "fform - should return generic error message above
+        all fields if :generic-error is present"
+       (fact "should return one error above fields"
+             (fform [:post "/login"]
+                    [[:textarea :username {:class "usern" :value "<i>"}]
+                     [:password :password {:class "pass"}]]
+                    {:generic-error "wrong"})
+             => [:form {:action (java.net.URI. "/login") :method "POST"}
+                 [:p {:class "generic-error"} "wrong"]
+                 [:textarea {:class "usern" 
+                             :id :username :name :username} "&lt;i&gt;"]
+                 [:input {:type :password :id "password" :class "pass"
+                          :name "password" :value ""}]]))
 
 
