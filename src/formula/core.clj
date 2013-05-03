@@ -14,14 +14,20 @@
 
 (defn- display-error
   "Displays errors if map contains a message"
-  [attr-key field errors]
-  (let [str-name (name attr-key)]
+  [attr-key field attrs errors]
+  (let [str-name (name attr-key)
+        wrap (:wrap attrs)
+        wrap-in (:wrap-in errors)
+        wrap-fields (:wrap-fields errors)
+        wrap-errors (:wrap-errors errors)
+        field-no-error (if wrap [wrap field] field)
+        field-error (if wrap-in field field-no-error)]
     (if (attr-key errors)
-      [(or (:wrap-fields errors) :div)
-       field
-       [(or (:wrap-errors errors) :p) {:class (str str-name "-error")}
+      [(if (and wrap wrap-in) wrap (or wrap-fields :div))
+       field-error
+       [(or wrap-errors :p) {:class (str str-name "-error")}
         (attr-key errors)]]
-      field)))
+      field-no-error)))
 
 (defelem generic-input
   "Generic input builder used for
@@ -29,9 +35,8 @@
   [type attr-key attrs & [errors]]
   (let [str-name (name attr-key)
         m-attrs (dissoc attrs :wrap)
-        field (input-field type str-name m-attrs)
-        field (if (:wrap attrs) [(:wrap attrs) field] field)]
-    (display-error attr-key field errors)))
+        field (input-field type str-name m-attrs)]
+    (display-error attr-key field attrs errors)))
 
 (defelem text-area
   "Creates text area element - escapes value"
@@ -39,9 +44,8 @@
   (let [m-attrs (dissoc attrs :value :wrap)
         field [:textarea (conj {:name attr-key
                                 :id attr-key} m-attrs)
-               (escape-html (:value attrs))]
-        field (if (:wrap attrs) [(:wrap attrs) field] field)]
-    (display-error attr-key field errors)))
+               (escape-html (:value attrs))]]
+    (display-error attr-key field attrs errors)))
 
 (defelem button
   "Creates button element"
@@ -57,9 +61,8 @@
   [_ attr-key attrs & [errors]]
   (let [m-attrs (dissoc attrs :selected :options :wrap)
         field [:select {:name attr-key :id attr-key}
-               (select-options (:options attrs) (:selected attrs))]
-        field (if (:wrap attrs) [(:wrap attrs) field] field)]
-    (display-error attr-key field errors)))
+               (select-options (:options attrs) (:selected attrs))]]
+    (display-error attr-key field attrs errors)))
 
 (def field-map
   "Functions for specific fields.

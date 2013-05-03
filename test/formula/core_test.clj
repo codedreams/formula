@@ -32,32 +32,39 @@
 (facts "display error - should return field with error or just field"
        (fact "should just return field if no error message"
              (display-error :username [:input {:type "text" :name "username"
-                                               :value ""}] {})
+                                               :value ""}] {} {})
              => [:input {:type "text" :name "username" :value ""}])
        (fact "should return error and field if error"
              (display-error :username [:input {:type "text" :name "username"
-                                               :value ""}]
+                                               :value ""}] {}
                             {:username "username must be present"})
              => [:div 
                  [:input {:type "text" :name "username" :value ""}]
                  [:p {:class "username-error"} "username must be present"]])
        (fact "should not return error if error for another field"
              (display-error :username [:input {:type "text" :name "username"
-                                               :value ""}]
+                                               :value ""}] {}
                             {:name "name must be present"})
              => [:input {:type "text" :name "username" :value ""}])
        (fact "should wrap fields with specific tag"
              (display-error :username [:input {:type "text" :name "username"}]
-                            {:username "bad" :wrap-fields :fieldset})
+                            {} {:username "bad" :wrap-fields :fieldset})
              => [:fieldset 
                  [:input {:type "text" :name "username"}]
                  [:p {:class "username-error"} "bad"]])
        
        (fact "should wrap errors with specific tag"
              (display-error :username [:input {:type "text" :name "username"}]
-                            {:username "bad" :wrap-errors :span})
+                            {} {:username "bad" :wrap-errors :span})
              => [:div 
                  [:input {:type "text" :name "username"}]
+                 [:span {:class "username-error"} "bad"]])
+
+       (fact "should return wrapped tag"
+             (display-error :username [:input {:type "text" :name "username"}]
+                            {:wrap :p} {:username "bad" :wrap-errors :span})
+             => [:div 
+                 [:p [:input {:type "text" :name "username"}]]
                  [:span {:class "username-error"} "bad"]]))
 
 (facts "generic-input - should be used to produce text, password, email
@@ -272,3 +279,31 @@
                   [:p [:input {:type :password :id "password" :name "password"
                                :value nil}]]
                   [:span {:class "password-error"} "bad"]]]))
+
+
+(facts "fform - should wrap fields and errors if :wrap-in is present"
+       (fact "should wrap field and error"
+             (fform [:post "/login"]
+                    [[:textarea :username {:wrap :div.control-group}]
+                     [:password :password {:wrap :div.control-group}]]
+                    {:password "bad" :username "bad" :wrap-in true})
+             => [:form {:action (java.net.URI. "/login") :method "POST"}
+                 [:div.control-group
+                  [:textarea {:id :username :name :username} ""]
+                  [:p {:class "username-error"} "bad"]]
+                 [:div.control-group
+                  [:input {:type :password :id "password" :name "password"
+                              :value nil}]
+                  [:p {:class "password-error"} "bad"]]])
+
+       (fact "should wrap without errors"
+             (fform [:post "/login"]
+                    [[:textarea :username {:wrap :div.control-group}]
+                     [:password :password {:wrap :div.control-group}]])
+             =>[:form {:action (java.net.URI. "/login") :method "POST"}
+                [:div.control-group
+                 [:textarea {:id :username :name :username} ""]]
+                [:div.control-group
+                 [:input {:type :password :id "password" :name "password"
+                          :value nil}]]]))
+
