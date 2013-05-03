@@ -25,7 +25,7 @@
     (if (attr-key errors)
       [(if (and wrap wrap-in) wrap (or wrap-fields :div))
        field-error
-       [(or wrap-errors :span) {:class (str str-name "-error")}
+       [(keyword (str (name (or wrap-errors :span)) "." str-name "-error"))
         (attr-key errors)]]
       field-no-error)))
 

@@ -7,7 +7,7 @@ Install
 To test formula out, 
 add the following dependency to your `project.clj` file:
 
-    [formula "1.3.1-alpha"]
+    [formula "1.3.2-alpha"]
 
 ###Formula's Forms
 

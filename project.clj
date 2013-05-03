@@ -1,4 +1,4 @@
-(defproject formula "1.3.1-alpha"
+(defproject formula "1.3.2-alpha"
   :description "Formula is a clojure library for html forms"
   :url "https://github.com/codedreams/formula"
   :license {:name "Eclipse Public License"
