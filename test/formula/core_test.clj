@@ -297,10 +297,11 @@
                   [:p {:class "password-error"} "bad"]]])
 
        (fact "should wrap without errors"
-             (fform [:post "/login"]
+             (fform {:class "form-horizontal"} [:post "/login"]
                     [[:textarea :username {:wrap :div.control-group}]
                      [:password :password {:wrap :div.control-group}]])
-             =>[:form {:action (java.net.URI. "/login") :method "POST"}
+             =>[:form {:action (java.net.URI. "/login") :method "POST"
+                       :class "form-horizontal"}
                 [:div.control-group
                  [:textarea {:id :username :name :username} ""]]
                 [:div.control-group

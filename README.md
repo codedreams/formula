@@ -108,6 +108,88 @@ Formula uses the same form to display fields, and display errors.  The flow is d
 ***
 ***
 
+### Available Options
+##### Form
+
+When designing forms you have various options when it comes to the display.
+
+**wrap** (for fields)
+
+* ```clojure
+[:password :password {:wrap :div.control-group}]
+```
+
+*  **:wrap** allows you to wrap whatever field in the specified tag.  The **.control-group** is hiccup's syntax for creating a class called control-group.
+
+**wrap-fields and wrap-errors** (for errors map)
+
+* ```clojure
+(fform [:post "/login"]
+       [[:textarea :username {:wrap :p}]
+        [:password :password {:wrap :p}]]
+       {:password "bad" :username "bad" :wrap-errors :span
+        :wrap-fields :fieldset})
+```
+
+* **wrap-fields** will wrap the error and the field with whatever tag specified, instead of the default div.
+
+* ```clojure
+[:fieldset
+ [:p [:textarea {:id :username :name :username} ""]]
+ [:span {:class "username-error"} "bad"]]
+```
+
+* **:wrap-errors** will wrap each individual error tag with whatever specified, instead of default p tag.
+
+**wrap-in** (for errors map)
+
+* ```clojure
+(fform [:post "/login"]
+       [[:textarea :username {:wrap :div.control-group}]
+        [:password :password {:wrap :div.control-group}]]
+       {:password "bad" :username "bad" :wrap-in true})
+```
+
+* **:wrap-in** should be set to true or something truthy.
+* **:wrap-in** puts the error message in whatever **:wrap** specifies.  So the example above will produce
+
+* *  ```clojure
+                 [:div.control-group
+                  [:textarea {:id :username :name :username} ""]
+                  [:p {:class "username-error"} "bad"]]
+```
+
+
+
+
+#####Validation
+
+As of right now formula's validation supports 
+
+* **present**
+
+* **allow-nil**
+
+* **allow-blank**
+
+* **confirm**
+
+* **exclusion**
+
+* **inclusion**
+
+* **formats**
+
+* **length**
+
+* **unique**
+
+* **numbers** (formula's version of numericality)
+
+* More details on above validation coming soon.
+
+
+
 ###Why
 
 Basic web development tasks should be easy to accomplish.  Things like form display and validation should only take a few minutes to implement, leaving more time for hard problems.
