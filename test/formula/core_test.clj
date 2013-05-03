@@ -11,7 +11,7 @@
        (fact "should return vector with no value"
              (input-field "text" "username" {:class "user"})
              => [:input {:type "text" :name "username" :id "username"
-                         :value "" :class "user"}])
+                         :value nil :class "user"}])
        (fact "return vector with value attr"
              (input-field "password" "password" {:value "foobar"})
              => [:input {:type "password" :name "password" :id "password"
@@ -19,11 +19,10 @@
        (fact "return vector with extra attr, placeholder"
              (input-field "text" "search" {:placeholder "Search Now"})
              => [:input {:type "text" :name "search" :id "search"
-                         :value "" :placeholder "Search Now"}])
+                         :value nil :placeholder "Search Now"}])
        (fact "values should be escaped"
-             (input-field "text" "search" {:value "<i>hi</i>"})
-             =>[:input {:type "text" :name "search" :id "search"
-                         :value "&lt;i&gt;hi&lt;&#x2F;i&gt;"}])
+             (html (input-field "text" "search" {:value "<>" :id nil}))
+             => "<input name=\"search\" type=\"text\" value=\"&lt;&gt;\" />")
        (fact "should create button tags"
              (input-field "button" "submit" {:name "" :value "Submit"})
              => [:input {:type "button" :name "" :id "submit" :value "Submit"}]))
@@ -52,25 +51,25 @@
                        checkbox, radio, hidden, and file fields"
       (fact "should create text field"
             (generic-input :text :search {})
-            => [:input {:type :text :name "search" :id "search" :value ""}])
+            => [:input {:type :text :name "search" :id "search" :value nil}])
       (fact "should create password field"
             (generic-input :password :search {})
-            => [:input {:type :password :name "search" :id "search" :value ""}])
+            => [:input {:type :password :name "search" :id "search" :value nil}])
       (fact "should create email field"
             (generic-input :email :search {})
-            => [:input {:type :email :name "search" :id "search" :value ""}])
+            => [:input {:type :email :name "search" :id "search" :value nil}])
       (fact "should create checkbox field"
             (generic-input :checkbox :search {})
-            => [:input {:type :checkbox :name "search" :id "search" :value ""}])
+            => [:input {:type :checkbox :name "search" :id "search" :value nil}])
       (fact "should create radio field"
             (generic-input :radio :search {})
-            => [:input {:type :radio :name "search" :id "search" :value ""}])
+            => [:input {:type :radio :name "search" :id "search" :value nil}])
       (fact "should create hidden field"
             (generic-input :hidden :search {})
-            => [:input {:type :hidden :name "search" :id "search" :value ""}])
+            => [:input {:type :hidden :name "search" :id "search" :value nil}])
       (fact "should create file field"
             (generic-input :file :search {})
-            => [:input {:type :file :name "search" :id "search" :value ""}])
+            => [:input {:type :file :name "search" :id "search" :value nil}])
       (fact "should accept extra attributes"
             (generic-input :text :search {:placeholder "Search" :value "Anything"})
             => [:input {:type :text :name "search" :id "search" 
@@ -78,7 +77,7 @@
       (fact "should display errors if available"
             (generic-input :text :search {} {:search "File must be jpg"})
             => [:div
-                [:input {:type :text :name "search" :id "search" :value ""}]
+                [:input {:type :text :name "search" :id "search" :value nil}]
                 [:p {:class "search-error"} "File must be jpg"]
                 ]))
 
@@ -140,12 +139,12 @@
                            [:password :password]]
                           {:username "must be present" :password "doesn't match"})
              => '([:div
-                   [:input {:type :text :class "user" :value "&lt;i&gt;"
+                   [:input {:type :text :class "user" :value "<i>"
                             :id "username" :name "username"}]
                    [:p {:class "username-error"} "must be present"]]
                     [:div
                      [:input {:type :password :id "password"
-                              :name "password" :value ""}]
+                              :name "password" :value nil}]
                      [:p {:class "password-error"} "doesn't match"]])))
 
 (facts "fform - should create forms"
@@ -161,7 +160,7 @@
                   [:p {:class "username-error"} "bad"]]
                  [:div
                   [:input {:type :password :id "password" :class "pass"
-                           :name "password" :value ""}]
+                           :name "password" :value nil}]
                   [:p {:class "password-error"} "bad"]]])
        
        (fact "should create get form"
@@ -169,7 +168,7 @@
                     [[:text :search {:value "<i>" :placeholder "Search"}]]
                     {:username "bad" :password "bad"})
              => [:form {:action (java.net.URI. "/login") :method "GET"}
-                 [:input {:type :text :id "search" :name "search" :value "&lt;i&gt;"
+                 [:input {:type :text :id "search" :name "search" :value "<i>"
                           :placeholder "Search"}]]))
 
 (facts "fform - should not display error if :no-errors is present"
@@ -182,7 +181,7 @@
                  [:textarea {:class "usern" 
                              :id :username :name :username} "&lt;i&gt;"]
                  [:input {:type :password :id "password" :class "pass"
-                          :name "password" :value ""}]]))
+                          :name "password" :value nil}]]))
 
 (facts "fform - should return generic error message above
         all fields if :generic-error is present"
@@ -196,6 +195,6 @@
                  [:textarea {:class "usern" 
                              :id :username :name :username} "&lt;i&gt;"]
                  [:input {:type :password :id "password" :class "pass"
-                          :name "password" :value ""}]]))
+                          :name "password" :value nil}]]))
 
 

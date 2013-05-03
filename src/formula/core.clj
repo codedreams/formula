@@ -5,13 +5,12 @@
             [hiccup.form :refer [hidden-field select-options]]))
 
 (defn- input-field
-  "For different input fields - escapes value"
+  "For different input fields"
   [type name attrs]
-  (let [attrs (assoc attrs :value (escape-html (:value attrs)))]
-    [:input (conj {:type type
-                   :name name
-                   :id name
-                   :value nil} attrs)]))
+  [:input (conj {:type type
+                 :name name
+                 :id name
+                 :value nil} attrs)])
 
 (defn- display-error
   "Displays errors if map contains a message"
