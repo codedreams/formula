@@ -17,9 +17,9 @@
   [attr-key field errors]
   (let [str-name (name attr-key)]
     (if (attr-key errors)
-      [:div
+      [(or (:wrap-fields errors) :div)
        field
-       [:p {:class (str str-name "-error")}
+       [(or (:wrap-errors errors) :p) {:class (str str-name "-error")}
         (attr-key errors)]]
       field)))
 
@@ -28,32 +28,37 @@
    text, password, email, checkbox, radio, hidden, file"
   [type attr-key attrs & [errors]]
   (let [str-name (name attr-key)
-        field (input-field type str-name attrs)]
+        m-attrs (dissoc attrs :wrap)
+        field (input-field type str-name m-attrs)
+        field (if (:wrap attrs) [(:wrap attrs) field] field)]
     (display-error attr-key field errors)))
 
 (defelem text-area
   "Creates text area element - escapes value"
   [_ attr-key attrs & [errors]]
-  (let [m-attrs (dissoc attrs :value)
+  (let [m-attrs (dissoc attrs :value :wrap)
         field [:textarea (conj {:name attr-key
                                 :id attr-key} m-attrs)
-               (escape-html (:value attrs))]]
+               (escape-html (:value attrs))]
+        field (if (:wrap attrs) [(:wrap attrs) field] field)]
     (display-error attr-key field errors)))
 
 (defelem button
   "Creates button element"
   [_ attr-key attrs & [errors]]
-  (let [m-attrs (dissoc attrs :value)
+  (let [m-attrs (dissoc attrs :value :wrap)
         field [:button (conj {:type "button" :id attr-key} m-attrs)
-               (:value attrs)]]
+               (:value attrs)]
+        field (if (:wrap attrs) [(:wrap attrs) field] field)]
     field))
 
 (defelem drop-down
   "Creates a drop down using the <select> tag"
   [_ attr-key attrs & [errors]]
-  (let [m-attrs (dissoc attrs :selected :options)
+  (let [m-attrs (dissoc attrs :selected :options :wrap)
         field [:select {:name attr-key :id attr-key}
-               (select-options (:options attrs) (:selected attrs))]]
+               (select-options (:options attrs) (:selected attrs))]
+        field (if (:wrap attrs) [(:wrap attrs) field] field)]
     (display-error attr-key field errors)))
 
 (def field-map

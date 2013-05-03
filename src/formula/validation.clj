@@ -1,9 +1,5 @@
 (ns formula.validation)
 
-;; (def call
-;;   "Changes strings into function calls"
-;;   #(resolve (symbol (name %))))
-
 (defn message
   "Creates messages"
   [k custom message]
