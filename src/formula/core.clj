@@ -16,18 +16,21 @@
   "Displays errors if map contains a message"
   [attr-key field attrs errors]
   (let [str-name (name attr-key)
-        wrap (:wrap attrs)
-        wrap-in (:wrap-in errors)
-        wrap-fields (:wrap-fields errors)
-        wrap-errors (:wrap-errors errors)
-        field-no-error (if wrap [wrap field] field)
-        field-error (if wrap-in field field-no-error)]
+        error-tag (:error-tag errors)
+        error-field [(keyword (str (name (or error-tag :span))
+                                   "." str-name "-error"))
+                     (attr-key errors)]
+        wrap-error (:wrap-error errors)
+        field-error (if wrap-error [wrap-error error-field] error-field)
+        wrap-both (:wrap-both errors)
+        error-result (if wrap-both
+                       [wrap-both field field-error]
+                       [:div field field-error])
+        result (if wrap-both
+                 [wrap-both field] field)]
     (if (attr-key errors)
-      [(if (and wrap wrap-in) wrap (or wrap-fields :div))
-       field-error
-       [(keyword (str (name (or wrap-errors :span)) "." str-name "-error"))
-        (attr-key errors)]]
-      field-no-error)))
+      (if (:no-errors errors) result error-result)
+      result)))
 
 (defelem generic-input
   "Generic input builder used for
@@ -35,8 +38,13 @@
   [type attr-key attrs & [errors]]
   (let [str-name (name attr-key)
         m-attrs (dissoc attrs :wrap)
-        field (input-field type str-name m-attrs)]
-    (display-error attr-key field attrs errors)))
+        field (input-field type str-name m-attrs)
+        field (if (:wrap attrs) [(:wrap attrs) field] field)
+        result (display-error attr-key field attrs errors)]
+    (if (:wrap-outer errors)
+      [(errors :wrap-outer) result]
+      result)))
+
 
 (defelem text-area
   "Creates text area element - escapes value"
@@ -44,7 +52,8 @@
   (let [m-attrs (dissoc attrs :value :wrap)
         field [:textarea (conj {:name attr-key
                                 :id attr-key} m-attrs)
-               (escape-html (:value attrs))]]
+               (escape-html (:value attrs))]
+        field (if (:wrap attrs) [(:wrap attrs) field] field)]
     (display-error attr-key field attrs errors)))
 
 (defelem button
@@ -61,7 +70,8 @@
   [_ attr-key attrs & [errors]]
   (let [m-attrs (dissoc attrs :selected :options :wrap)
         field [:select {:name attr-key :id attr-key}
-               (select-options (:options attrs) (:selected attrs))]]
+               (select-options (:options attrs) (:selected attrs))]
+        field (if (:wrap attrs) [(:wrap attrs) field] field)]
     (display-error attr-key field attrs errors)))
 
 (def field-map
@@ -75,7 +85,9 @@
   [field-vec errors]
   (let [deal (fn [[field attr-key attrs]]
                ((or (field field-map) generic-input) field attr-key attrs errors))
-        body (map deal field-vec)]
+        body (map deal field-vec)
+        wrap-all (:wrap-all errors)
+        body (if wrap-all (seq [(into [wrap-all] body)]) body)]
     (if (:generic-error errors)
       (concat (seq [[:p {:class "generic-error"} (:generic-error errors)]])
               body)
@@ -88,9 +100,7 @@
   [[method action] field-vec & [errors]]
   
   (let [method-str (.toUpperCase (name method))
-        action-uri (to-uri action)
-        errors (if (:no-errors errors) nil errors)
-        ]
+        action-uri (to-uri action)]
     
     (-> (if (contains? #{:get :post} method)
           [:form {:method method-str, :action action-uri}]

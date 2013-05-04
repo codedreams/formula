@@ -51,31 +51,34 @@
        
        (fact "should wrap fields with specific tag"
              (display-error :username [:input {:type "text" :name "username"}]
-                            {} {:username "bad" :wrap-fields :fieldset})
+                            {} {:username "bad" :wrap-both :fieldset})
              => [:fieldset 
                  [:input {:type "text" :name "username"}]
                  [:span.username-error "bad"]])
        
        (fact "should wrap errors with specific tag"
              (display-error :username [:input {:type "text" :name "username"}]
-                            {} {:username "bad" :wrap-errors :span})
+                            {} {:username "bad" :wrap-error :span.error})
              => [:div 
                  [:input {:type "text" :name "username"}]
-                 [:span.username-error "bad"]])
+                 [:span.error
+                  [:span.username-error "bad"]]])
 
        (fact "should return wrapped tag"
              (display-error :username [:input {:type "text" :name "username"}]
-                            {:wrap :p} {:username "bad" :wrap-errors :span})
+                            {} {:username "bad" :wrap-error :span.err})
              => [:div 
-                 [:p [:input {:type "text" :name "username"}]]
-                 [:span.username-error "bad"]])
+                 [:input {:type "text" :name "username"}]
+                 [:span.err
+                  [:span.username-error "bad"]]])
 
        (fact "should return wrapped error with class"
              (display-error :username [:input {:type "text" :name "username"}]
-                            {:wrap :p} {:username "bad" :wrap-errors :span.error})
+                             {} {:username "bad" :wrap-error :span.error})
              => [:div 
-                 [:p [:input {:type "text" :name "username"}]]
-                 [:span.error.username-error "bad"]]))
+                 [:input {:type "text" :name "username"}]
+                 [:span.error
+                  [:span.username-error "bad"]]]))
 
 
 (facts "generic-input - should be used to produce text, password, email
@@ -249,74 +252,68 @@
              (fform [:post "/login"]
                     [[:textarea :username {}]
                      [:password :password {}]]
-                    {:password "bad" :username "bad" :wrap-errors :span})
+                    {:password "bad" :username "bad" :wrap-error :span.err})
              => [:form {:action (java.net.URI. "/login") :method "POST"}
                  [:div
                   [:textarea {:id :username :name :username} ""]
-                  [:span.username-error "bad"]]
+                  [:span.err
+                   [:span.username-error "bad"]]]
                  [:div
                   [:input {:type :password :id "password" :name "password"
                            :value nil}]
-                  [:span.password-error "bad"]]]))
+                  [:span.err
+                   [:span.password-error "bad"]]]]))
 
-(facts "fform - should wrap fields in specific error tag"
+(facts "fform - should wrap both in specific error tag"
        (fact "should wrap error and field in specific tag"
              (fform [:post "/login"]
                     [[:textarea :username {}]
                      [:password :password {}]]
-                    {:password "bad" :username "bad" :wrap-errors :span
-                     :wrap-fields :fieldset})
+                    {:password "bad" :username "bad" :error-tag :span.er
+                     :wrap-both :fieldset})
              => [:form {:action (java.net.URI. "/login") :method "POST"}
                  [:fieldset
                   [:textarea {:id :username :name :username} ""]
-                  [:span.username-error "bad"]]
+                  [:span.er.username-error "bad"]]
                  [:fieldset
                   [:input {:type :password :id "password" :name "password"
                            :value nil}]
-                  [:span.password-error "bad"]]]))
+                  [:span.er.password-error "bad"]]]))
 
-(facts "fform- should wrap field tags if wrap is present"
+(facts "fform- should wrap error tag"
        (fact "should wrap fields if wrap is a rule"
              (fform [:post "/login"]
                     [[:textarea :username {:wrap :p}]
                      [:password :password {:wrap :p}]]
-                    {:password "bad" :username "bad" :wrap-errors :span
-                     :wrap-fields :fieldset})
+                    {:password "bad" :username "bad" :wrap-error :div
+                     :wrap-both :fieldset})
              => [:form {:action (java.net.URI. "/login") :method "POST"}
                  [:fieldset
                   [:p [:textarea {:id :username :name :username} ""]]
-                  [:span.username-error "bad"]]
+                  [:div
+                   [:span.username-error "bad"]]]
                  [:fieldset
                   [:p [:input {:type :password :id "password" :name "password"
                                :value nil}]]
-                  [:span.password-error "bad"]]]))
-
-
-(facts "fform - should wrap fields and errors if :wrap-in is present"
-       (fact "should wrap field and error"
+                  [:div
+                   [:span.password-error "bad"]]]])
+       
+       (fact "should wrap all fields in form"
              (fform [:post "/login"]
-                    [[:textarea :username {:wrap :div.control-group}]
-                     [:password :password {:wrap :div.control-group}]]
-                    {:password "bad" :username "bad" :wrap-in true})
+                    [[:textarea :username {:wrap :p}]
+                     [:password :password {:wrap :p}]]
+                    {:password "bad" :username "bad" :wrap-error :div
+                     :wrap-both :fieldset :wrap-all :div.forms-fields})
              => [:form {:action (java.net.URI. "/login") :method "POST"}
-                 [:div.control-group
-                  [:textarea {:id :username :name :username} ""]
-                  [:span.username-error "bad"]]
-                 [:div.control-group
-                  [:input {:type :password :id "password" :name "password"
-                              :value nil}]
-                  [:span.password-error "bad"]]])
-
-       (fact "should wrap without errors"
-             (fform {:class "form-horizontal"} [:post "/login"]
-                    [[:textarea :username {:wrap :div.control-group}]
-                     [:password :password {:wrap :div.control-group}]])
-             =>[:form {:action (java.net.URI. "/login") :method "POST"
-                       :class "form-horizontal"}
-                [:div.control-group
-                 [:textarea {:id :username :name :username} ""]]
-                [:div.control-group
-                 [:input {:type :password :id "password" :name "password"
-                          :value nil}]]]))
+                 [:div.forms-fields
+                  [:fieldset
+                   [:p [:textarea {:id :username :name :username} ""]]
+                   [:div
+                    [:span.username-error "bad"]]]
+                  [:fieldset
+                   [:p [:input {:type :password :id "password" :name "password"
+                                :value nil}]]
+                   [:div
+                    [:span.password-error "bad"]]]]]))
 
 
