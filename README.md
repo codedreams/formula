@@ -123,6 +123,8 @@ When designing forms you have various options when it comes to the display.
 
 * **wrap-all**
 
+* **csrf**
+
 * More details on the above coming soon.
 
                   
