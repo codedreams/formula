@@ -3,9 +3,9 @@
 (defn message
   "Creates messages"
   [k custom message]
-  (clojure.string/trim (or (when custom
-                             (format custom (name k)))
-                           (format message (name k)))))
+  (clojure.string/trim (if custom
+                         (format custom (name k))
+                         (format message (name k)))))
 
 (defn present
   "Checks if key is present"
@@ -75,28 +75,26 @@
       {field-key (message field-key custom
                           "%s is not the correct format")})))
 
+(defn- length-helper [min max value]
+  (let [both-values (not-any? nil? [min max])
+        both-empty (and (nil? max) (nil? min))]
+    (cond
+     both-empty nil
+     both-values (when-not (some #{value} (range min (+ 1 max)))
+                   (str "%s should be between " min " and " max " characters"))
+     (nil? max) (when-not (>= value min)
+                  (str "%s should be at least " min " characters"))
+     (nil? min) (when-not (<= value max)
+                  (str "%s should be at most " max " characters")))))
+
 (defn length
   "Checks to see if value is the correct length"
   [field-key length-map vali-map & [messages]]
   (let [min (length-map :min)
         max (length-map :max)
-        both-values (not-any? nil? [min max])
-        both-empty (and (nil? max) (nil? min))
         value (count (field-key vali-map))
         custom (:length (field-key messages))
-        result (cond
-                both-empty nil
-                both-values (when-not (some #{value}
-                                            (range min (+ 1 max)))
-                              (str "%s should be between "
-                                   min " and " max
-                                   " characters"))
-                (nil? max) (when-not (>= value min)
-                             (str "%s should be at least "
-                                  min " characters"))
-                (nil? min) (when-not (<= value max)
-                             (str "%s should be at most "
-                                  max " characters")))]
+        result (length-helper min max value)]
     (when result
       {field-key (message field-key custom result)})))
 
@@ -118,23 +116,22 @@
       (recur (rest rules)
              (conj errors (validate-fn (first rules) messages))))))
 
+(def ^:private options
+  {:gt #(or (> % %2) (str "%s must be greater than " %2))
+   :gte #(or (>= % %2) (str "%s must be greater or equal to " %2))
+   :eq #(or (= % %2) (str "%s must be equal to " %2)) 
+   :lt #(or (< % %2) (str "%s must be less than " %2))
+   :lte #(or (<= % %2) (str "%s must be less than or equal to " %2))
+   :only-int (fn [val _] (or (integer? val) "%s must be an integer"))
+   :odd (fn [val _] (or (odd? (int val)) "%s must be odd"))
+   :even (fn [val _] (or (even? (int val)) "%s must be even"))})
+
 (defn numbers
   "Checks to see if number matches various options supported.  If value
    is not a number, defaults to error message \"whatever must be a number\"."
   [field-key number-map vali-map & [messages]]
-  ;;; Put try catch, right after check if only-int, if-not parse float
   (try
     (let [custom (:numbers (field-key messages))
-          options
-          {:gt #(or (> % %2) (str "%s must be greater than " %2))
-           :gte #(or (>= % %2) (str "%s must be greater or equal to " %2))
-           :eq #(or (= % %2) (str "%s must be equal to " %2)) 
-           :lt #(or (< % %2) (str "%s must be less than " %2))
-           :lte #(or (<= % %2) (str "%s must be less than or equal to " %2))
-           :only-int (fn [val _] (or (integer? val) "%s must be an integer"))
-           :odd (fn [val _] (or (odd? (int val)) "%s must be odd"))
-           :even (fn [val _] (or (even? (int val)) "%s must be even"))
-           }
           value (field-key vali-map)
           value (if (some #{:only-int} (keys number-map))
                   value (Float/parseFloat (str value)))

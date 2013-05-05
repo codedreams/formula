@@ -100,12 +100,15 @@
   [[method action] field-vec & [errors]]
   
   (let [method-str (.toUpperCase (name method))
-        action-uri (to-uri action)]
+        action-uri (to-uri action)
+        csrf (:csrf errors)]
     
     (-> (if (contains? #{:get :post} method)
-          [:form {:method method-str, :action action-uri}]
+          [:form {:method method-str, :action action-uri}
+           csrf]
           [:form {:method "POST", :action action-uri}
-           (hidden-field "_method" method-str)])
+           (hidden-field "_method" method-str)
+           csrf])
         (concat (form-fields field-vec errors))
         (vec))))
 

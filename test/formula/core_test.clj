@@ -3,7 +3,8 @@
         formula.core
         midje.sweet
         hiccup.core)
-  (:require [midje.util :refer [testable-privates]]))
+  (:require [midje.util :refer [testable-privates]]
+            [hiccup.form :refer [hidden-field]]))
 
 (testable-privates formula.core input-field)
 
@@ -202,7 +203,7 @@
                     [[:textarea :username {:class "usern" :value "<i>"}]
                      [:password :password {:class "pass"}]]
                     {:username "bad" :password "bad"})
-             => [:form {:action (java.net.URI. "/login") :method "POST"}
+             => [:form {:action (java.net.URI. "/login") :method "POST"} nil
                  [:div
                   [:textarea {:class "usern" 
                               :id :username :name :username} "&lt;i&gt;"]
@@ -216,7 +217,7 @@
              (fform [:get "/login"]
                     [[:text :search {:value "<i>" :placeholder "Search"}]]
                     {:username "bad" :password "bad"})
-             => [:form {:action (java.net.URI. "/login") :method "GET"}
+             => [:form {:action (java.net.URI. "/login") :method "GET"} nil
                  [:input {:type :text :id "search" :name "search" :value "<i>"
                           :placeholder "Search"}]]))
 
@@ -226,7 +227,7 @@
                     [[:textarea :username {:class "usern" :value "<i>"}]
                      [:password :password {:class "pass"}]]
                     {:no-errors true :username "bad" :password "pass"})
-             => [:form {:action (java.net.URI. "/login") :method "POST"}
+             => [:form {:action (java.net.URI. "/login") :method "POST"} nil
                  [:textarea {:class "usern" 
                              :id :username :name :username} "&lt;i&gt;"]
                  [:input {:type :password :id "password" :class "pass"
@@ -239,13 +240,12 @@
                     [[:textarea :username {:class "usern" :value "<i>"}]
                      [:password :password {:class "pass"}]]
                     {:generic-error "wrong"})
-             => [:form {:action (java.net.URI. "/login") :method "POST"}
+             => [:form {:action (java.net.URI. "/login") :method "POST"} nil
                  [:p {:class "generic-error"} "wrong"]
                  [:textarea {:class "usern" 
                              :id :username :name :username} "&lt;i&gt;"]
                  [:input {:type :password :id "password" :class "pass"
                           :name "password" :value nil}]]))
-
 
 (facts "fform - should wrap errors in specific error tag"
        (fact "should wrap errors in specified tag"
@@ -253,7 +253,7 @@
                     [[:textarea :username {}]
                      [:password :password {}]]
                     {:password "bad" :username "bad" :wrap-error :span.err})
-             => [:form {:action (java.net.URI. "/login") :method "POST"}
+             => [:form {:action (java.net.URI. "/login") :method "POST"} nil
                  [:div
                   [:textarea {:id :username :name :username} ""]
                   [:span.err
@@ -271,7 +271,7 @@
                      [:password :password {}]]
                     {:password "bad" :username "bad" :error-tag :span.er
                      :wrap-both :fieldset})
-             => [:form {:action (java.net.URI. "/login") :method "POST"}
+             => [:form {:action (java.net.URI. "/login") :method "POST"} nil
                  [:fieldset
                   [:textarea {:id :username :name :username} ""]
                   [:span.er.username-error "bad"]]
@@ -288,6 +288,7 @@
                     {:password "bad" :username "bad" :wrap-error :div
                      :wrap-both :fieldset})
              => [:form {:action (java.net.URI. "/login") :method "POST"}
+                 nil
                  [:fieldset
                   [:p [:textarea {:id :username :name :username} ""]]
                   [:div
@@ -304,7 +305,7 @@
                      [:password :password {:wrap :p}]]
                     {:password "bad" :username "bad" :wrap-error :div
                      :wrap-both :fieldset :wrap-all :div.forms-fields})
-             => [:form {:action (java.net.URI. "/login") :method "POST"}
+             => [:form {:action (java.net.URI. "/login") :method "POST"} nil
                  [:div.forms-fields
                   [:fieldset
                    [:p [:textarea {:id :username :name :username} ""]]
@@ -315,5 +316,36 @@
                                 :value nil}]]
                    [:div
                     [:span.password-error "bad"]]]]]))
+
+
+(facts "fform should wrap proper tags"
+       (fact "should wrap both tags - with no error"
+             (fform [:post "/login"]
+                    [[:textarea :username {:wrap :p}]
+                     [:password :password {:wrap :p}]]
+                    {:wrap-error :div
+                     :wrap-both :fieldset})
+             => [:form {:action (java.net.URI. "/login") :method "POST"}
+                 nil
+                 [:fieldset
+                  [:p [:textarea {:id :username :name :username} ""]]]
+                 [:fieldset
+                  [:p [:input {:type :password :id "password" :name "password"
+                               :value nil}]]]]))
+
+(facts "fform should contain csrf token - if provided"
+       (fact "should contain csrf token in form."
+             (fform [:post "/login"]
+                    [[:textarea :username]
+                     [:password :password]]
+                    {:wrap-error :div :csrf (html (hidden-field "kjdkfj0293"))
+                     :wrap-both :fieldset})
+              => [:form {:action (java.net.URI. "/login") :method "POST"}
+                  "<input id=\"kjdkfj0293\" name=\"kjdkfj0293\" type=\"hidden\" />"
+                 [:fieldset
+                  [:textarea {:id :username :name :username} ""]]
+                 [:fieldset
+                  [:input {:type :password :id "password" :name "password"
+                              :value nil}]]]))
 
 
