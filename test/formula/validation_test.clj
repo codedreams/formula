@@ -5,7 +5,7 @@
         hiccup.core))
 
 (def user-m {:username "joe" :password "abcdef" :confirmation "abcdef"
-             :gender "male" :age nil :nickname "" :friends 30})
+             :gender "male" :age nil :nickname "" :friends 30 :rich true})
 
 
 (facts "message - use format for custom message or default"
@@ -252,7 +252,10 @@
             => {:username "bad"})
       (fact "should only return the first error"
             (sender-loop :username [{:unique #(= % "joe")} {:formats #"\d+"}]
-                         user-m) => {:username "username must be unique"}))
+                         user-m) => {:username "username must be unique"})
+      (fact "should not return errors"
+            (sender-loop :rich [{:custom [true? true]}] user-m)
+            => {}))
 
 
 (facts "default-check - should return errors or {}"
@@ -309,6 +312,7 @@
        (fact "should get errors"
              (validate [[:password :present {:length {:min 8}}]
                         [:age {:length {:min 3 :max 10}}]
+                        ;[:rich {:custom [true? false]}]
                         [:username :present {:unique #(= % "joe")}]
                         [:gender {:inclusion ["nada"]}]
                         [:school :present]

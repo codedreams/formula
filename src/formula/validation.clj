@@ -157,7 +157,8 @@
 
 (def call {:present present :allow-nil allow-nil :allow-blank allow-blank
             :confirm confirm :exclusion exclusion :inclusion inclusion
-            :formats formats :length length :unique unique :numbers numbers})
+            :formats formats :length length :unique unique :numbers numbers
+           :custom custom})
 
 (defn sender-loop [field rules vali-map & [messages]]
   (let [vali (fn [r & [msg]] (if (map? r)
