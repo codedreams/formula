@@ -159,6 +159,16 @@
                                                    {:unique "not unique"}})
             => {:username "not unique"}))
 
+(facts "custom - should be nil or validation error message"
+       (fact "return nil when value works"
+             (custom :a [true? true] (conj user-m {:a true})) => nil)
+       (fact "should return error"
+             (custom :a [false? true] (conj user-m {:a true}))
+             => {:a "a is not acceptable"})
+       (fact "should take custom message when provided"
+             (custom :a [false? true] (conj user-m {:a true}) {:a {:custom "bad"}})
+             => {:a "bad"}))
+
 (facts "sender-loop vali function - should direct rule"
       (let [vali (fn [r & msg] (if (map? r)
                        ((call (apply key r)) :username (apply val r) user-m msg)))]

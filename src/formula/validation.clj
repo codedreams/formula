@@ -109,6 +109,18 @@
     (when result
       {field-key (message field-key custom "%s must be unique")})))
 
+(defn custom
+  "Takes a vector of two values, the function and expected return value.
+   Call the function on the value, and makes sure the result is the same
+   as the return value."
+  [field-key value-vec vali-map & [messages]]
+  (let [[f v] value-vec
+        value (field-key vali-map)
+        custom (:custom (field-key messages))
+        result (= (f value) v)]
+    (when-not result
+      {field-key (message field-key custom "%s is not acceptable")})))
+
 (defn loop-fn [rules validate-fn & [messages]]
   (loop [rules rules errors {}]
     (if (or (empty? rules) (seq errors))

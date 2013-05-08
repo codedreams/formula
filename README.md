@@ -7,7 +7,7 @@ Install
 To test formula out, 
 add the following dependency to your `project.clj` file:
 
-    [formula "1.0.0-beta"]
+    [formula "1.0.0"]
 
 ###Formula's Forms
 
@@ -164,8 +164,6 @@ Basic web development tasks should be easy to accomplish.  Things like form disp
 ###Todo
 
 * Make a list of all validation and field options available.
-* Implement in an actual application to see if work flow is as desired.
-* Improve parts of code and readme.
 
 
 
