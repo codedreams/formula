@@ -94,8 +94,9 @@
             (generic-input :email :search {})
             => [:input {:type :email :name "search" :id "search" :value nil}])
       (fact "should create checkbox field"
-            (generic-input :checkbox :search {})
-            => [:input {:type :checkbox :name "search" :id "search" :value nil}])
+            (generic-input :checkbox :search {:in-tag "keep"})
+            => [:input {:type :checkbox :name "search" :id "search" :value nil}
+                "keep"])
       (fact "should create radio field"
             (generic-input :radio :search {})
             => [:input {:type :radio :name "search" :id "search" :value nil}])
@@ -347,5 +348,4 @@
                  [:fieldset
                   [:input {:type :password :id "password" :name "password"
                               :value nil}]]]))
-
 

@@ -312,13 +312,14 @@
        (fact "should get errors"
              (validate [[:password :present {:length {:min 8}}]
                         [:age {:length {:min 3 :max 10}}]
-                        ;[:rich {:custom [true? false]}]
+                        [:rich {:custom [true? false]}]
                         [:username :present {:unique #(= % "joe")}]
                         [:gender {:inclusion ["nada"]}]
                         [:school :present]
                         [:nickname {:exclusion ["admin"]}]] user-m)
              => {:password "password should be at least 8 characters"
                  :age "age can't be empty"
+                 :rich "rich is not acceptable"
                  :username "username must be unique"
                  :gender "gender is not an acceptable term"
                  :school "school must be present"

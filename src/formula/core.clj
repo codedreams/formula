@@ -7,10 +7,11 @@
 (defn- input-field
   "For different input fields"
   [type name attrs]
-  [:input (conj {:type type
-                 :name name
-                 :id name
-                 :value nil} attrs)])
+  (let [field-attrs (dissoc attrs :in-tag)
+        field-attrs (conj {:type type :name name :id name :value nil} field-attrs)]
+    (if (= type :checkbox)
+      [:input field-attrs (:in-tag attrs)]
+      [:input field-attrs])))
 
 (defn- display-error
   "Displays errors if map contains a message"
