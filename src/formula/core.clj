@@ -24,11 +24,12 @@
         wrap-error (:wrap-error errors)
         field-error (if wrap-error [wrap-error error-field] error-field)
         wrap-both (:wrap-both errors)
+        label (when (:label attrs) [:label {:for str-name} (:label attrs)])
         error-result (if wrap-both
-                       [wrap-both field field-error]
-                       [:div field field-error])
+                       (vec (remove nil? [wrap-both label field field-error]))
+                       (vec (remove nil? [:div label field field-error])))
         result (if wrap-both
-                 [wrap-both field] field)]
+                 (vec (remove nil? [wrap-both label field])) field)]
     (if (attr-key errors)
       (if (:no-errors errors) result error-result)
       result)))
@@ -38,7 +39,7 @@
    text, password, email, checkbox, radio, hidden, file"
   [type attr-key attrs & [errors]]
   (let [str-name (name attr-key)
-        m-attrs (dissoc attrs :wrap)
+        m-attrs (dissoc attrs :wrap :label)
         field (input-field type str-name m-attrs)
         field (if (:wrap attrs) [(:wrap attrs) field] field)
         result (display-error attr-key field attrs errors)]
@@ -46,11 +47,18 @@
       [(errors :wrap-outer) result]
       result)))
 
+;; (defelem label
+;;   "Creates label tags for elements"
+;;   [_ attr-key attrs & [errors]]
+;;   (let [m-attrs (conj (dissoc attrs :value) {:for (name attr-key)})
+;;         field [:label m-attrs (:value attrs)]]
+;;     field))
+
 
 (defelem text-area
   "Creates text area element - escapes value"
   [_ attr-key attrs & [errors]]
-  (let [m-attrs (dissoc attrs :value :wrap)
+  (let [m-attrs (dissoc attrs :value :wrap :label)
         field [:textarea (conj {:name attr-key
                                 :id attr-key} m-attrs)
                (escape-html (:value attrs))]
@@ -60,7 +68,7 @@
 (defelem button
   "Creates button element"
   [_ attr-key attrs & [errors]]
-  (let [m-attrs (dissoc attrs :value :wrap)
+  (let [m-attrs (dissoc attrs :value :wrap :label)
         field [:button (conj {:type "button" :id attr-key} m-attrs)
                (:value attrs)]
         field (if (:wrap attrs) [(:wrap attrs) field] field)]
@@ -69,7 +77,7 @@
 (defelem drop-down
   "Creates a drop down using the <select> tag"
   [_ attr-key attrs & [errors]]
-  (let [m-attrs (dissoc attrs :selected :options :wrap)
+  (let [m-attrs (dissoc attrs :selected :options :wrap :label)
         field [:select {:name attr-key :id attr-key}
                (select-options (:options attrs) (:selected attrs))]
         field (if (:wrap attrs) [(:wrap attrs) field] field)]

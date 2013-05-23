@@ -343,9 +343,24 @@
                      :wrap-both :fieldset})
               => [:form {:action (java.net.URI. "/login") :method "POST"}
                   "<input id=\"kjdkfj0293\" name=\"kjdkfj0293\" type=\"hidden\" />"
-                 [:fieldset
+                 [:fieldset 
                   [:textarea {:id :username :name :username} ""]]
                  [:fieldset
                   [:input {:type :password :id "password" :name "password"
                               :value nil}]]]))
 
+(facts "fform should wrap proper tags"
+       (fact "should wrap both tags - with no error"
+             (fform [:post "/login"]
+                    [[:textarea :username {:wrap :p :label "Username"}]
+                     [:password :password {:wrap :p}]]
+                    {:wrap-error :div
+                     :wrap-both :fieldset})
+             => [:form {:action (java.net.URI. "/login") :method "POST"}
+                 nil
+                 [:fieldset
+                  [:label {:for "username"} "Username"]
+                  [:p [:textarea {:id :username :name :username} ""]]]
+                 [:fieldset
+                  [:p [:input {:type :password :id "password" :name "password"
+                               :value nil}]]]]))
