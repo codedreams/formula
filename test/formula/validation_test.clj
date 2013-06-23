@@ -7,6 +7,9 @@
 (def user-m {:username "joe" :password "abcdef" :confirmation "abcdef"
              :gender "male" :age nil :nickname "" :friends 30 :rich true})
 
+(def validations {:email [:email :present]
+                  :username [:username :present {:length {:min 5 :max 50}}]
+                  :rich [:rich :present]})
 
 (facts "message - use format for custom message or default"
        (fact "no custom should return default"
@@ -325,3 +328,27 @@
                  :school "school must be present"
                  :nickname "nickname can't be blank"}))
 
+(facts "vali-map"
+       (fact "should return vector of validation rules "
+             (vali-map validations :email :username)
+             => [[:email :present]
+                 [:username :present {:length {:min 5 :max 50}}]]))
+
+(facts "vali-vec"
+       (let [form-fields [[:textarea :username {:label "username"}]
+                          [:email :email {:wrap :p}]]]
+         
+         (fact "should return vector of validation rules"
+               (vali-vec validations form-fields)
+               => [[:username :present {:length {:min 5 :max 50}}]
+                   [:email :present ]])))
+
+(facts "vali-rules"
+       (fact "should return vector of validation rules"
+             (vali-rules [[:textarea :username {:label "username"}]
+                          [:email :email {:wrap :p}]]
+                         [[:username :present]
+                          [:email :present]
+                          [:name :present]])
+             => [[:username :present]
+                 [:email :present]]))

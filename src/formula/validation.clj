@@ -202,5 +202,19 @@
                  result)]
     (into {} errors)))
 
+(defn vali-map
+  "Takes a map with all validation rules and keys to select from map.
+   Creates validation vector to use with validate function."
+  [m & kys]
+  (mapv #(m %) kys))
 
+(defn vali-vec
+  "Takes map of validation rules and vector of vectors from your form"
+  [m vec]
+  (mapv #(m (second %)) vec))
 
+(defn vali-rules
+  "Takes form vec and vali rules to filter specific rules for form"
+  [form-vec vali-rules]
+  (let [kys (map #(second %) form-vec)]
+    (vec (filter #(some #{(first %)} kys) vali-rules))))
