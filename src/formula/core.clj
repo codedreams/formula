@@ -47,14 +47,6 @@
       [(errors :wrap-outer) result]
       result)))
 
-;; (defelem label
-;;   "Creates label tags for elements"
-;;   [_ attr-key attrs & [errors]]
-;;   (let [m-attrs (conj (dissoc attrs :value) {:for (name attr-key)})
-;;         field [:label m-attrs (:value attrs)]]
-;;     field))
-
-
 (defelem text-area
   "Creates text area element - escapes value"
   [_ attr-key attrs & [errors]]
@@ -78,16 +70,24 @@
   "Creates a drop down using the <select> tag"
   [_ attr-key attrs & [errors]]
   (let [m-attrs (dissoc attrs :selected :options :wrap :label)
-        field [:select {:name attr-key :id attr-key}
+        field [:select (conj {:name attr-key :id attr-key} m-attrs)
                (select-options (:options attrs) (:selected attrs))]
         field (if (:wrap attrs) [(:wrap attrs) field] field)]
     (display-error attr-key field attrs errors)))
+
+(defelem generic-tag
+  "Creates legend html tag"
+  [type attr-key attrs & [errors]]
+  (let [m-attrs (dissoc attrs :wrap :value)
+        field [type m-attrs (:value attrs)]
+        field (if (:wrap attrs) [(:wrap attrs) field] field)]
+    field))
 
 (def field-map
   "Functions for specific fields.
    - Options available but not include are
      text, password, email, checkbox, radio, hidden, file"
-  {:textarea text-area :dropdown drop-down :button-tag button})
+  {:textarea text-area :dropdown drop-down :button-tag button :legend generic-tag})
 
 (defelem form-fields
   "Calls field functions"

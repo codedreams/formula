@@ -152,8 +152,8 @@
 
 (facts "drop-down - should return drop-down element"
       (fact "should return dropdown"
-            (drop-down nil :friends {:options ["so" "say"]})
-            => [:select {:name :friends :id :friends}
+            (drop-down nil :friends {:options ["so" "say"] :class "happy"})
+            => [:select {:name :friends :id :friends :class "happy"}
                 '([:option {:selected false} "so"]
                    [:option {:selected false} "say"])])
 
@@ -180,9 +180,9 @@
 
 (facts "field-map - should have correct functions"
        (fact "should have correct keys"
-             (every? #{:textarea :dropdown :button-tag} (keys field-map)) => true)
+             (every? #{:textarea :dropdown :button-tag :legend} (keys field-map)) => true)
        (fact "should have 3 key value pairs"
-             (count field-map) => 3))
+             (count field-map) => 4))
 
 (facts "Form fields - should call field functions"
        (fact "should return fields"
@@ -363,4 +363,22 @@
                   [:p [:textarea {:id :username :name :username} ""]]]
                  [:fieldset
                   [:p [:input {:type :password :id "password" :name "password"
+                               :value nil}]]]]))
+
+(facts "legend"
+       (fact "should return legend tag"
+             (fform [:post "/login"]
+                    [[:legend :legend {:value "Everyone" :class "happy"}]
+                     [:textarea :username {:wrap :p :label "Username"}]
+                     [:password :password {:wrap :p}]]
+                    {:wrap-error :div
+                     :wrap-both :fieldset})
+             =>[:form {:action (java.net.URI. "/login") :method "POST"}
+                 nil
+                [:legend {:class "happy"} "Everyone"]
+                [:fieldset
+                 [:label {:for "username"} "Username"]
+                 [:p [:textarea {:id :username :name :username} ""]]]
+                [:fieldset
+                 [:p [:input {:type :password :id "password" :name "password"
                                :value nil}]]]]))
